@@ -14,23 +14,9 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(jbuild_version 1)
-
-(executables
- ((names (example knockknock fact))
-  (libraries (wcs-lib))))
-
-(alias
- ((name   runtest)
-  (deps   (example.exe))
-  (action (run ${<}))))
-
-(alias
- ((name   runtest)
-  (deps   (knockknock.exe))
-  (action (run ${<} -print))))
-
-(alias
- ((name   runtest)
-  (deps   (fact.exe))
-  (action (run ${<} -print))))
+(executable
+ (modes byte exe)
+ (name wcs_cli)
+ (public_name wcs)
+ (package wcs)
+ (libraries wcs-lib))
