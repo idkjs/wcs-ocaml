@@ -15,10 +15,11 @@
 # limitations under the License.
 
 
-JBUILDER ?= jbuilder
+DUNE ?= dune
 
 all:
-	$(JBUILDER) build @install
+	$(DUNE) build @install
+	$(DUNE) build @install
 
 clean:
 	rm -rf _build *.install

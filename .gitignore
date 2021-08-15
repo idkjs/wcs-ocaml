@@ -10,7 +10,8 @@ wcs.install
 wcs-cli/.merlin
 wcs-lib/.merlin
 examples/.merlin
-.jbuilder-keep
+.dune-keep
 
 # emacs
 *~
+credentials
