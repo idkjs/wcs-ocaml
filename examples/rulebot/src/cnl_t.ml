@@ -54,12 +54,12 @@ let default_loc =
   ((Parsing.symbol_start_pos ()), (Parsing.symbol_end_pos ()))
 [@@@ocaml.text " {6. Nodes}"]
 type id = int option
-let rec (id_to_yojson : id -> Yojson.Safe.json) =
+let rec (id_to_yojson : id -> Yojson.Safe.t) =
   ((
     function | None  -> `Null | Some x -> ((fun x  -> `Int x)) x)[@ocaml.warning
       "-A"])
 and (id_of_yojson :
-       Yojson.Safe.json -> id error_or)
+       Yojson.Safe.t -> id error_or)
   =
   ((
     function
@@ -74,7 +74,7 @@ type 'a node =
   | N_rejected of id* 'a
   | N_accepted of 'a
 let rec node_to_yojson :
-  'a . ('a -> Yojson.Safe.json) -> 'a node -> Yojson.Safe.json=
+  'a . ('a -> Yojson.Safe.t) -> 'a node -> Yojson.Safe.t=
   fun poly_a  ->
     ((
       function
@@ -84,20 +84,20 @@ let rec node_to_yojson :
           `List
             [`String "N_filled";
              ((fun x  -> id_to_yojson x)) arg0;
-             (poly_a : _ -> Yojson.Safe.json) arg1]
+             (poly_a : _ -> Yojson.Safe.t) arg1]
       | N_rejected (arg0,arg1) ->
           `List
             [`String "N_rejected";
              ((fun x  -> id_to_yojson x)) arg0;
-             (poly_a : _ -> Yojson.Safe.json) arg1]
+             (poly_a : _ -> Yojson.Safe.t) arg1]
       | N_accepted arg0 ->
           `List
-            [`String "N_accepted"; (poly_a : _ -> Yojson.Safe.json) arg0])
+            [`String "N_accepted"; (poly_a : _ -> Yojson.Safe.t) arg0])
         [@ocaml.warning "-A"])
 and node_of_yojson :
   'a .
-    (Yojson.Safe.json -> 'a error_or) ->
-  Yojson.Safe.json -> 'a node error_or=
+    (Yojson.Safe.t -> 'a error_or) ->
+  Yojson.Safe.t -> 'a node error_or=
   fun poly_a  ->
     ((
       function
@@ -105,24 +105,24 @@ and node_of_yojson :
           ((fun x  -> id_of_yojson x) arg0) >>=
           ((fun arg0  -> Ok (N_undefined arg0)))
       | `List ((`String "N_filled")::arg0::arg1::[]) ->
-          ((poly_a : Yojson.Safe.json -> _ error_or) arg1) >>=
+          ((poly_a : Yojson.Safe.t -> _ error_or) arg1) >>=
           ((fun arg1  ->
              ((fun x  -> id_of_yojson x) arg0) >>=
              (fun arg0  -> Ok (N_filled (arg0, arg1)))))
       | `List ((`String "N_rejected")::arg0::arg1::[]) ->
-          ((poly_a : Yojson.Safe.json -> _ error_or) arg1) >>=
+          ((poly_a : Yojson.Safe.t -> _ error_or) arg1) >>=
           ((fun arg1  ->
              ((fun x  -> id_of_yojson x) arg0) >>=
              (fun arg0  -> Ok (N_rejected (arg0, arg1)))))
       | `List ((`String "N_accepted")::arg0::[]) ->
-          ((poly_a : Yojson.Safe.json -> _ error_or) arg0) >>=
+          ((poly_a : Yojson.Safe.t -> _ error_or) arg0) >>=
           ((fun arg0  -> Ok (N_accepted arg0)))
       | _ -> Error "Cnl_t.node")[@ocaml.warning "-A"])
 type 'a node_list = {
   list_elems: 'a list;
   list_closed: unit node;}
 let rec node_list_to_yojson :
-  'a . ('a -> Yojson.Safe.json) -> 'a node_list -> Yojson.Safe.json=
+  'a . ('a -> Yojson.Safe.t) -> 'a node_list -> Yojson.Safe.t=
   fun poly_a  ->
     ((
       fun x  ->
@@ -133,14 +133,14 @@ let rec node_list_to_yojson :
           :: fields in
         let fields =
           ("list_elems",
-           ((fun x  -> `List (List.map (poly_a : _ -> Yojson.Safe.json) x))
+           ((fun x  -> `List (List.map (poly_a : _ -> Yojson.Safe.t) x))
               x.list_elems))
           :: fields in
         `Assoc fields)[@ocaml.warning "-A"])
 and node_list_of_yojson :
   'a .
-    (Yojson.Safe.json -> 'a error_or) ->
-  Yojson.Safe.json -> 'a node_list error_or=
+    (Yojson.Safe.t -> 'a error_or) ->
+  Yojson.Safe.t -> 'a node_list error_or=
   fun poly_a  ->
     ((
       function
@@ -151,7 +151,7 @@ and node_list_of_yojson :
                 loop xs
                   (((function
                    | `List xs ->
-                       map_bind (poly_a : Yojson.Safe.json -> _ error_or)
+                       map_bind (poly_a : Yojson.Safe.t -> _ error_or)
                          [] xs
                    | _ -> Error "Cnl_t.node_list.list_elems") x),
                    arg1)
@@ -226,7 +226,7 @@ and cnl_expr_desc =
   | E_agg of cnl_aggop* cnl_expr* field_name
   | E_unop of cnl_unop* cnl_expr
   | E_binop of cnl_binop* cnl_expr* cnl_expr
-  | E_error of Yojson.Safe.json
+  | E_error of Yojson.Safe.t
   | E_this of event_name
   | E_new of event_name* cnl_setter list
 and cnl_setter = (field_name* cnl_expr)
@@ -267,7 +267,7 @@ and cnl_binop =
 and cnl_aggop =
   | A_total
   | A_avg
-let rec (cnl_rule_to_yojson : cnl_rule -> Yojson.Safe.json) =
+let rec (cnl_rule_to_yojson : cnl_rule -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -284,7 +284,7 @@ let rec (cnl_rule_to_yojson : cnl_rule -> Yojson.Safe.json) =
         :: fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_rule_of_yojson :
-       Yojson.Safe.json -> cnl_rule error_or)
+       Yojson.Safe.t -> cnl_rule error_or)
   =
   ((
     function
@@ -309,7 +309,7 @@ and (cnl_rule_of_yojson :
           ((Error "Cnl_t.cnl_rule.rule_node"),
            (Ok default_loc))
     | _ -> Error "Cnl_t.cnl_rule")[@ocaml.warning "-A"])
-and (cnl_rule_desc_to_yojson : cnl_rule_desc -> Yojson.Safe.json) =
+and (cnl_rule_desc_to_yojson : cnl_rule_desc -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -324,7 +324,7 @@ and (cnl_rule_desc_to_yojson : cnl_rule_desc -> Yojson.Safe.json) =
         fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_rule_desc_of_yojson :
-       Yojson.Safe.json -> cnl_rule_desc error_or)
+       Yojson.Safe.t -> cnl_rule_desc error_or)
   =
   ((
     function
@@ -356,7 +356,7 @@ and (cnl_rule_desc_of_yojson :
            (Error "Cnl_t.cnl_rule_desc.rule_cond"),
            (Error "Cnl_t.cnl_rule_desc.rule_actns"))
     | _ -> Error "Cnl_t.cnl_rule_desc")[@ocaml.warning "-A"])
-and (cnl_event_to_yojson : cnl_event -> Yojson.Safe.json) =
+and (cnl_event_to_yojson : cnl_event -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -373,7 +373,7 @@ and (cnl_event_to_yojson : cnl_event -> Yojson.Safe.json) =
         :: fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_event_of_yojson :
-       Yojson.Safe.json -> cnl_event error_or)
+       Yojson.Safe.t -> cnl_event error_or)
   =
   ((
     function
@@ -398,7 +398,7 @@ and (cnl_event_of_yojson :
           ((Error "Cnl_t.cnl_event.evnt_node"),
            (Ok default_loc))
     | _ -> Error "Cnl_t.cnl_event")[@ocaml.warning "-A"])
-and (cnl_evnt_desc_to_yojson : cnl_evnt_desc -> Yojson.Safe.json) =
+and (cnl_evnt_desc_to_yojson : cnl_evnt_desc -> Yojson.Safe.t) =
   ((
     fun (arg0,arg1)  ->
       `List
@@ -408,7 +408,7 @@ and (cnl_evnt_desc_to_yojson : cnl_evnt_desc -> Yojson.Safe.json) =
           | Some x -> ((fun x  -> variable_name_to_yojson x)) x)) arg1])
       [@ocaml.warning "-A"])
 and (cnl_evnt_desc_of_yojson :
-       Yojson.Safe.json -> cnl_evnt_desc error_or)
+       Yojson.Safe.t -> cnl_evnt_desc error_or)
   =
   ((
     function
@@ -423,7 +423,7 @@ and (cnl_evnt_desc_of_yojson :
            ((fun x  -> event_name_of_yojson x) arg0) >>=
            (fun arg0  -> Ok (arg0, arg1))))
     | _ -> Error "Cnl_t.cnl_evnt_desc")[@ocaml.warning "-A"])
-and (cnl_cond_to_yojson : cnl_cond -> Yojson.Safe.json) =
+and (cnl_cond_to_yojson : cnl_cond -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -440,7 +440,7 @@ and (cnl_cond_to_yojson : cnl_cond -> Yojson.Safe.json) =
         :: fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_cond_of_yojson :
-       Yojson.Safe.json -> cnl_cond error_or)
+       Yojson.Safe.t -> cnl_cond error_or)
   =
   ((
     function
@@ -465,7 +465,7 @@ and (cnl_cond_of_yojson :
           ((Error "Cnl_t.cnl_cond.cond_node"),
            (Ok default_loc))
     | _ -> Error "Cnl_t.cnl_cond")[@ocaml.warning "-A"])
-and (cnl_cond_desc_to_yojson : cnl_cond_desc -> Yojson.Safe.json) =
+and (cnl_cond_desc_to_yojson : cnl_cond_desc -> Yojson.Safe.t) =
   ((
     function
     | C_no_condition  -> `List [`String "C_no_condition"]
@@ -474,7 +474,7 @@ and (cnl_cond_desc_to_yojson : cnl_cond_desc -> Yojson.Safe.json) =
           [`String "C_condition"; ((fun x  -> cnl_expr_to_yojson x)) arg0])
       [@ocaml.warning "-A"])
 and (cnl_cond_desc_of_yojson :
-       Yojson.Safe.json -> cnl_cond_desc error_or)
+       Yojson.Safe.t -> cnl_cond_desc error_or)
   =
   ((
     function
@@ -483,7 +483,7 @@ and (cnl_cond_desc_of_yojson :
         ((fun x  -> cnl_expr_of_yojson x) arg0) >>=
         ((fun arg0  -> Ok (C_condition arg0)))
     | _ -> Error "Cnl_t.cnl_cond_desc")[@ocaml.warning "-A"])
-and (cnl_actions_to_yojson : cnl_actions -> Yojson.Safe.json) =
+and (cnl_actions_to_yojson : cnl_actions -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -501,7 +501,7 @@ and (cnl_actions_to_yojson : cnl_actions -> Yojson.Safe.json) =
         :: fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_actions_of_yojson :
-       Yojson.Safe.json -> cnl_actions error_or)
+       Yojson.Safe.t -> cnl_actions error_or)
   =
   ((
     function
@@ -526,17 +526,17 @@ and (cnl_actions_of_yojson :
           ((Error "Cnl_t.cnl_actions.actns_node"),
            (Ok default_loc))
     | _ -> Error "Cnl_t.cnl_actions")[@ocaml.warning "-A"])
-and (cnl_actns_desc_to_yojson : cnl_actns_desc -> Yojson.Safe.json) =
+and (cnl_actns_desc_to_yojson : cnl_actns_desc -> Yojson.Safe.t) =
   ((
     fun x  -> (node_list_to_yojson (fun x  -> cnl_action_to_yojson x)) x)
       [@ocaml.warning "-A"])
 and (cnl_actns_desc_of_yojson :
-       Yojson.Safe.json -> cnl_actns_desc error_or)
+       Yojson.Safe.t -> cnl_actns_desc error_or)
   =
   ((
     fun x  -> (node_list_of_yojson (fun x  -> cnl_action_of_yojson x)) x)
       [@ocaml.warning "-A"])
-and (cnl_action_to_yojson : cnl_action -> Yojson.Safe.json) =
+and (cnl_action_to_yojson : cnl_action -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -553,7 +553,7 @@ and (cnl_action_to_yojson : cnl_action -> Yojson.Safe.json) =
         :: fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_action_of_yojson :
-       Yojson.Safe.json -> cnl_action error_or)
+       Yojson.Safe.t -> cnl_action error_or)
   =
   ((
     function
@@ -578,7 +578,7 @@ and (cnl_action_of_yojson :
           ((Error "Cnl_t.cnl_action.actn_node"),
            (Ok default_loc))
     | _ -> Error "Cnl_t.cnl_action")[@ocaml.warning "-A"])
-and (cnl_actn_desc_to_yojson : cnl_actn_desc -> Yojson.Safe.json) =
+and (cnl_actn_desc_to_yojson : cnl_actn_desc -> Yojson.Safe.t) =
   ((
     function
     | A_print arg0 ->
@@ -597,7 +597,7 @@ and (cnl_actn_desc_to_yojson : cnl_actn_desc -> Yojson.Safe.json) =
            ((fun x  -> variable_name_to_yojson x)) arg1;
            ((fun x  -> cnl_expr_to_yojson x)) arg2])[@ocaml.warning "-A"])
 and (cnl_actn_desc_of_yojson :
-       Yojson.Safe.json -> cnl_actn_desc error_or)
+       Yojson.Safe.t -> cnl_actn_desc error_or)
   =
   ((
     function
@@ -620,7 +620,7 @@ and (cnl_actn_desc_of_yojson :
               ((fun x  -> field_name_of_yojson x) arg0) >>=
               (fun arg0  -> Ok (A_set (arg0, arg1, arg2))))))
     | _ -> Error "Cnl_t.cnl_actn_desc")[@ocaml.warning "-A"])
-and (cnl_expr_to_yojson : cnl_expr -> Yojson.Safe.json) =
+and (cnl_expr_to_yojson : cnl_expr -> Yojson.Safe.t) =
   ((
     fun x  ->
       let fields = [] in
@@ -648,7 +648,7 @@ and (cnl_expr_to_yojson : cnl_expr -> Yojson.Safe.json) =
         :: fields in
       `Assoc fields)[@ocaml.warning "-A"])
 and (cnl_expr_of_yojson :
-       Yojson.Safe.json -> cnl_expr error_or)
+       Yojson.Safe.t -> cnl_expr error_or)
   =
   ((
     function
@@ -698,7 +698,7 @@ and (cnl_expr_of_yojson :
            (Error "Cnl_t.cnl_expr.expr_field"),
            (Ok default_loc))
     | _ -> Error "Cnl_t.cnl_expr")[@ocaml.warning "-A"])
-and (cnl_expr_desc_to_yojson : cnl_expr_desc -> Yojson.Safe.json) =
+and (cnl_expr_desc_to_yojson : cnl_expr_desc -> Yojson.Safe.t) =
   ((
     function
     | E_lit arg0 ->
@@ -738,7 +738,7 @@ and (cnl_expr_desc_to_yojson : cnl_expr_desc -> Yojson.Safe.json) =
            ((fun x  -> `List (List.map (fun x  -> cnl_setter_to_yojson x) x)))
              arg1])[@ocaml.warning "-A"])
 and (cnl_expr_desc_of_yojson :
-       Yojson.Safe.json -> cnl_expr_desc error_or)
+       Yojson.Safe.t -> cnl_expr_desc error_or)
   =
   ((
     function
@@ -786,14 +786,14 @@ and (cnl_expr_desc_of_yojson :
            ((fun x  -> event_name_of_yojson x) arg0) >>=
            (fun arg0  -> Ok (E_new (arg0, arg1)))))
     | _ -> Error "Cnl_t.cnl_expr_desc")[@ocaml.warning "-A"])
-and (cnl_setter_to_yojson : cnl_setter -> Yojson.Safe.json) =
+and (cnl_setter_to_yojson : cnl_setter -> Yojson.Safe.t) =
   ((
     fun (arg0,arg1)  ->
       `List
         [((fun x  -> field_name_to_yojson x)) arg0;
          ((fun x  -> cnl_expr_to_yojson x)) arg1])[@ocaml.warning "-A"])
 and (cnl_setter_of_yojson :
-       Yojson.Safe.json -> cnl_setter error_or)
+       Yojson.Safe.t -> cnl_setter error_or)
   =
   ((
     function
@@ -803,7 +803,7 @@ and (cnl_setter_of_yojson :
            ((fun x  -> field_name_of_yojson x) arg0) >>=
            (fun arg0  -> Ok (arg0, arg1))))
     | _ -> Error "Cnl_t.cnl_setter")[@ocaml.warning "-A"])
-and (cnl_literal_to_yojson : cnl_literal -> Yojson.Safe.json) =
+and (cnl_literal_to_yojson : cnl_literal -> Yojson.Safe.t) =
   ((
     function
     | L_string arg0 ->
@@ -824,7 +824,7 @@ and (cnl_literal_to_yojson : cnl_literal -> Yojson.Safe.json) =
         `List [`String "L_duration"; ((fun x  -> `String x)) arg0])
       [@ocaml.warning "-A"])
 and (cnl_literal_of_yojson :
-       Yojson.Safe.json -> cnl_literal error_or)
+       Yojson.Safe.t -> cnl_literal error_or)
   =
   ((
     function
@@ -881,50 +881,50 @@ and (cnl_literal_of_yojson :
          | _ -> Error "Cnl_t.cnl_literal") arg0) >>=
         ((fun arg0  -> Ok (L_duration arg0)))
     | _ -> Error "Cnl_t.cnl_literal")[@ocaml.warning "-A"])
-and (event_name_to_yojson : event_name -> Yojson.Safe.json) =
+and (event_name_to_yojson : event_name -> Yojson.Safe.t) =
   (( fun x  -> `String x)[@ocaml.warning
      "-A"])
 and (event_name_of_yojson :
-       Yojson.Safe.json -> event_name error_or)
+       Yojson.Safe.t -> event_name error_or)
   =
   ((
     function
     | `String x -> Ok x
     | _ -> Error "Cnl_t.event_name")[@ocaml.warning "-A"])
-and (variable_name_to_yojson : variable_name -> Yojson.Safe.json) =
+and (variable_name_to_yojson : variable_name -> Yojson.Safe.t) =
   (( fun x  -> `String x)[@ocaml.warning
      "-A"])
 and (variable_name_of_yojson :
-       Yojson.Safe.json -> variable_name error_or)
+       Yojson.Safe.t -> variable_name error_or)
   =
   ((
     function
     | `String x -> Ok x
     | _ -> Error "Cnl_t.variable_name")[@ocaml.warning "-A"])
-and (field_name_to_yojson : field_name -> Yojson.Safe.json) =
+and (field_name_to_yojson : field_name -> Yojson.Safe.t) =
   (( fun x  -> `String x)[@ocaml.warning
      "-A"])
 and (field_name_of_yojson :
-       Yojson.Safe.json -> field_name error_or)
+       Yojson.Safe.t -> field_name error_or)
   =
   ((
     function
     | `String x -> Ok x
     | _ -> Error "Cnl_t.field_name")[@ocaml.warning "-A"])
-and (cnl_unop_to_yojson : cnl_unop -> Yojson.Safe.json) =
+and (cnl_unop_to_yojson : cnl_unop -> Yojson.Safe.t) =
   ((
     function
     | Op_not  -> `List [`String "Op_not"]
     | Op_toString  -> `List [`String "Op_toString"])[@ocaml.warning "-A"])
 and (cnl_unop_of_yojson :
-       Yojson.Safe.json -> cnl_unop error_or)
+       Yojson.Safe.t -> cnl_unop error_or)
   =
   ((
     function
     | `List ((`String "Op_not")::[]) -> Ok Op_not
     | `List ((`String "Op_toString")::[]) -> Ok Op_toString
     | _ -> Error "Cnl_t.cnl_unop")[@ocaml.warning "-A"])
-and (cnl_binop_to_yojson : cnl_binop -> Yojson.Safe.json) =
+and (cnl_binop_to_yojson : cnl_binop -> Yojson.Safe.t) =
   ((
     function
     | Op_eq  -> `List [`String "Op_eq"]
@@ -944,7 +944,7 @@ and (cnl_binop_to_yojson : cnl_binop -> Yojson.Safe.json) =
     | Op_concat  -> `List [`String "Op_concat"]
     | Op_during  -> `List [`String "Op_during"])[@ocaml.warning "-A"])
 and (cnl_binop_of_yojson :
-       Yojson.Safe.json -> cnl_binop error_or)
+       Yojson.Safe.t -> cnl_binop error_or)
   =
   ((
     function
@@ -965,13 +965,13 @@ and (cnl_binop_of_yojson :
     | `List ((`String "Op_concat")::[]) -> Ok Op_concat
     | `List ((`String "Op_during")::[]) -> Ok Op_during
     | _ -> Error "Cnl_t.cnl_binop")[@ocaml.warning "-A"])
-and (cnl_aggop_to_yojson : cnl_aggop -> Yojson.Safe.json) =
+and (cnl_aggop_to_yojson : cnl_aggop -> Yojson.Safe.t) =
   ((
     function
     | A_total  -> `List [`String "A_total"]
     | A_avg  -> `List [`String "A_avg"])[@ocaml.warning "-A"])
 and (cnl_aggop_of_yojson :
-       Yojson.Safe.json -> cnl_aggop error_or)
+       Yojson.Safe.t -> cnl_aggop error_or)
   =
   ((
     function

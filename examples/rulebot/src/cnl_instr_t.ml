@@ -48,7 +48,7 @@ type cnl_instr =
   | I_conf_actns of int* bool
   | I_conf_rule of int* bool
   | I_insr_actn
-let rec (cnl_instr_to_yojson : cnl_instr -> Yojson.Safe.json) =
+let rec (cnl_instr_to_yojson : cnl_instr -> Yojson.Safe.t) =
   ((
     function
     | I_repl_expr (arg0,arg1) ->
@@ -113,7 +113,7 @@ let rec (cnl_instr_to_yojson : cnl_instr -> Yojson.Safe.json) =
            ((fun x  -> `Bool x)) arg1]
     | I_insr_actn  -> `List [`String "I_insr_actn"])[@ocaml.warning "-A"])
 and (cnl_instr_of_yojson :
-       Yojson.Safe.json -> cnl_instr error_or)
+       Yojson.Safe.t -> cnl_instr error_or)
   =
   ((
     function
@@ -218,12 +218,12 @@ and (cnl_instr_of_yojson :
     | `List ((`String "I_insr_actn")::[]) -> Ok I_insr_actn
     | _ -> Error "Cnl_instr_t.cnl_instr")[@ocaml.warning "-A"])
 type cnl_program = cnl_instr list
-let rec (cnl_program_to_yojson : cnl_program -> Yojson.Safe.json) =
+let rec (cnl_program_to_yojson : cnl_program -> Yojson.Safe.t) =
   ((
     fun x  -> `List (List.map (fun x  -> cnl_instr_to_yojson x) x))
       [@ocaml.warning "-A"])
 and (cnl_program_of_yojson :
-       Yojson.Safe.json -> cnl_program error_or)
+       Yojson.Safe.t -> cnl_program error_or)
   =
   ((
     function

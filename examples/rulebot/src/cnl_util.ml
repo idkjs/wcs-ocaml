@@ -900,7 +900,7 @@ let json_of_rule_desc desc =
 let rec json_replace
           (old: string)
           (new_: string)
-          (j: Yojson.Basic.json)
+          (j: Yojson.Basic.t)
   =
   begin match j with
   | `Null

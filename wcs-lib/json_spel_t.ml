@@ -31,7 +31,7 @@ type json_spel = [
 
 (** {6 Serialization/deserialization functions for atdgen} *)
 
-let rec yojson_of_json_spel (j: json_spel) : Yojson.Basic.json =
+let rec yojson_of_json_spel (j: json_spel) : Yojson.Basic.t =
   begin match j with
   | `Assoc l ->
       `Assoc (List.map (fun x -> (fst x, yojson_of_json_spel (snd x))) l)
@@ -43,7 +43,7 @@ let rec yojson_of_json_spel (j: json_spel) : Yojson.Basic.json =
   | `Expr e -> `String (Spel_print.to_text e)
   end
 
-let rec json_spel_of_yojson (j: Yojson.Basic.json) : json_spel =
+let rec json_spel_of_yojson (j: Yojson.Basic.t) : json_spel =
   begin match j with
   | `Assoc l ->
       `Assoc (List.map (fun x -> (fst x, json_spel_of_yojson (snd x))) l)

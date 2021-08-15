@@ -53,7 +53,7 @@ type 'a dispatch =
     dsp_cond: bool;
     dsp_then: bool;}
 let rec dispatch_to_yojson :
-  'a . ('a -> Yojson.Safe.json) -> 'a dispatch -> Yojson.Safe.json=
+  'a . ('a -> Yojson.Safe.t) -> 'a dispatch -> Yojson.Safe.t=
   fun poly_a  ->
     ((
       fun x  ->
@@ -68,7 +68,7 @@ let rec dispatch_to_yojson :
           ("dsp_number",
            ((function
             | None  -> `Null
-            | Some x -> (poly_a : _ -> Yojson.Safe.json) x) x.dsp_number))
+            | Some x -> (poly_a : _ -> Yojson.Safe.t) x) x.dsp_number))
           :: fields in
         let fields = ("dsp_abort", ((fun x  -> `Bool x) x.dsp_abort)) ::
                      fields in
@@ -77,8 +77,8 @@ let rec dispatch_to_yojson :
         `Assoc fields)[@ocaml.warning "-A"])
 and dispatch_of_yojson :
   'a .
-    (Yojson.Safe.json -> 'a error_or) ->
-  Yojson.Safe.json -> 'a dispatch error_or=
+    (Yojson.Safe.t -> 'a error_or) ->
+  Yojson.Safe.t -> 'a dispatch error_or=
   fun poly_a  ->
     ((
       function
@@ -104,7 +104,7 @@ and dispatch_of_yojson :
                    ((function
                     | `Null -> Ok None
                     | x ->
-                        ((poly_a : Yojson.Safe.json -> _ error_or) x) >>=
+                        ((poly_a : Yojson.Safe.t -> _ error_or) x) >>=
                         ((fun x  -> Ok (Some x)))) x), arg3,
                    arg4, arg5)
             | ("dsp_when",x)::xs ->

@@ -101,7 +101,7 @@ let get_rule (ctx: json) (lbl: string) : cnl_rule option =
   begin match Yojson.Basic.Util.member lbl ctx with
   | `Null -> None
   | rule ->
-      begin match Cnl_t.cnl_rule_of_yojson (rule :> Yojson.Safe.json) with
+      begin match Cnl_t.cnl_rule_of_yojson (rule :> Yojson.Safe.t) with
       | Deriving_intf.Error _ -> None
       | Deriving_intf.Ok x -> Some x
       end
@@ -116,7 +116,7 @@ let get_expr (ctx: json) (lbl: string) : cnl_expr option =
   begin match Yojson.Basic.Util.member lbl ctx with
   | `Null -> None
   | expr ->
-      begin match Cnl_t.cnl_expr_of_yojson (expr :> Yojson.Safe.json) with
+      begin match Cnl_t.cnl_expr_of_yojson (expr :> Yojson.Safe.t) with
       | Deriving_intf.Error _ -> None
       | Deriving_intf.Ok x -> Some x
       end
@@ -132,7 +132,7 @@ let get_evnt_desc (ctx: json) (lbl: string) : cnl_evnt_desc option =
   begin match Yojson.Basic.Util.member lbl ctx with
   | `Null -> None
   | desc ->
-      begin match Cnl_t.cnl_evnt_desc_of_yojson (desc :> Yojson.Safe.json) with
+      begin match Cnl_t.cnl_evnt_desc_of_yojson (desc :> Yojson.Safe.t) with
       | Deriving_intf.Error _ -> None
       | Deriving_intf.Ok x -> Some x
       end
@@ -148,7 +148,7 @@ let get_cond_desc  (ctx: json) (lbl: string) : cnl_cond_desc option =
   begin match Yojson.Basic.Util.member lbl ctx with
   | `Null -> None
   | desc ->
-      begin match Cnl_t.cnl_cond_desc_of_yojson (desc :> Yojson.Safe.json) with
+      begin match Cnl_t.cnl_cond_desc_of_yojson (desc :> Yojson.Safe.t) with
       | Deriving_intf.Error _ -> None
       | Deriving_intf.Ok x -> Some x
       end
@@ -164,7 +164,7 @@ let get_actns_desc (ctx: json) (lbl: string) : cnl_actns_desc option =
   begin match Yojson.Basic.Util.member lbl ctx with
   | `Null -> None
   | desc ->
-      begin match Cnl_t.cnl_actns_desc_of_yojson (desc :> Yojson.Safe.json) with
+      begin match Cnl_t.cnl_actns_desc_of_yojson (desc :> Yojson.Safe.t) with
       | Deriving_intf.Error _ -> None
       | Deriving_intf.Ok x -> Some x
       end
@@ -180,7 +180,7 @@ let get_actn_desc (ctx: json) (lbl: string) : cnl_actn_desc option =
   begin match Yojson.Basic.Util.member lbl ctx with
   | `Null -> None
   | desc ->
-      begin match Cnl_t.cnl_actn_desc_of_yojson (desc :> Yojson.Safe.json) with
+      begin match Cnl_t.cnl_actn_desc_of_yojson (desc :> Yojson.Safe.t) with
       | Deriving_intf.Error _ -> None
       | Deriving_intf.Ok x -> Some x
       end

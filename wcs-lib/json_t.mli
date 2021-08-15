@@ -18,9 +18,9 @@
 
 (** JSON type definition. *)
 
-type safe = Yojson.Safe.json
+type safe = Yojson.Safe.t
 
-type basic = Yojson.Basic.json
+type basic = Yojson.Basic.t
 
 type json = basic
 

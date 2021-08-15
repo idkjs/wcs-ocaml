@@ -16,8 +16,8 @@
  * limitations under the License.
  *)
 
-type safe = Yojson.Safe.json
-type basic = Yojson.Basic.json
+type safe = Yojson.Safe.t
+type basic = Yojson.Basic.t
 type json = basic
 type lexer_state = Yojson.Basic.lexer_state
 type bi_outbuf_t = Bi_outbuf.t
